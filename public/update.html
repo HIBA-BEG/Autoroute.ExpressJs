@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Update Trajet</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 p-6">
+    <div class="max-w-4xl mx-auto bg-white p-6 rounded-lg shadow-md">
+        <h1 class="text-2xl font-bold mb-4">Update Trajet</h1>
+        <form id="updateForm">
+            <input type="hidden" id="id">
+            
+            <label for="pt_entree" class="block text-lg font-medium mb-2">Point d'entrée:</label>
+            <input type="text" id="pt_entree" class="border border-gray-300 rounded-lg p-2 w-full mb-4" required>
+            
+            <label for="pt_sortie" class="block text-lg font-medium mb-2">Point de sortie:</label>
+            <input type="text" id="pt_sortie" class="border border-gray-300 rounded-lg p-2 w-full mb-4" required>
+            
+            <label for="type" class="block text-lg font-medium mb-2">Type:</label>
+            <select id="type" class="border border-gray-300 rounded-lg p-2 w-full mb-4" required>
+                <option value="arrêts">arrêts</option>
+                <option value="dépassements de vitesse">dépassements de vitesse</option>
+                <option value="accidents">accidents</option>
+                <option value="réparations">réparations</option>
+            </select>
+            
+            <label for="date_time" class="block text-lg font-medium mb-2">Date and Time:</label>
+            <input type="datetime-local" id="date_time" class="border border-gray-300 rounded-lg p-2 w-full mb-4" required>
+            
+            <button type="submit" class="bg-green-500 text-white py-2 px-4 rounded hover:bg-green-600">Update Trajet</button>
+        </form>
+        <a href="/" class="mt-4 inline-block bg-gray-500 text-white py-2 px-4 rounded hover:bg-gray-600">Back to Home</a>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const id = urlParams.get('id');
+            
+            if (id) {
+                fetch(`/trajets/${id}`)
+                    .then(response => response.json())
+                    .then(data => {
+                        if (data) {
+                            document.getElementById('id').value = data.id;
+                            document.getElementById('pt_entree').value = data.pt_entree;
+                            document.getElementById('pt_sortie').value = data.pt_sortie;
+                            document.getElementById('type').value = data.type;
+                            document.getElementById('date_time').value = new Date(data.date_time).toISOString().slice(0, -1);
+                        } else {
+                            alert('Trajet not found');
+                        }
+                    })
+                    .catch(error => console.error('Error:', error));
+            }
+        });
+
+        document.getElementById('updateForm').addEventListener('submit', event => {
+            event.preventDefault();
+            const id = document.getElementById('id').value;
+            const pt_entree = document.getElementById('pt_entree').value;
+            const pt_sortie = document.getElementById('pt_sortie').value;
+            const type = document.getElementById('type').value;
+            const date_time = document.getElementById('date_time').value;
+
+            fetch(`/trajets/${id}`, {
+                method: 'PUT',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ pt_entree, pt_sortie, type, date_time })
+            })
+            .then(response => response.json())
+            .then(() => {
+                alert('Trajet updated successfully');
+                window.location.href = '/';
+            })
+            .catch(error => console.error('Error:', error));
+        });
+    </script>
+</body>
+</html>
